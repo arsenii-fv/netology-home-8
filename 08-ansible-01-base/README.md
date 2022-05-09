@@ -7,6 +7,7 @@
 
 ## Основная часть
 1. Попробуйте запустить playbook на окружении из `test.yml`, зафиксируйте какое значение имеет факт `some_fact` для указанного хоста при выполнении playbook'a.
+
 vagrant@netology1:~/8-git-net/mnt-homeworks/08-ansible-01-base/playbook$ ansible-playbook -i inventory/test.yml site.yml
 
 PLAY [Print os facts] ******************************************************************************************************
@@ -30,15 +31,197 @@ localhost                  : ok=3    changed=0    unreachable=0    failed=0    s
 some_fact = 12
 
 2. Найдите файл с переменными (group_vars) в котором задаётся найденное в первом пункте значение и поменяйте его на 'all default fact'.
+vagrant@netology1:~/8-git-net/mnt-homeworks/08-ansible-01-base/playbook$ ansible-playbook -i inventory/test.yml site.yml
+
+PLAY [Print os facts] ******************************************************************************************************
+
+TASK [Gathering Facts] *****************************************************************************************************
+ok: [localhost]
+
+TASK [Print OS] ************************************************************************************************************
+ok: [localhost] => {
+    "msg": "Ubuntu"
+}
+
+TASK [Print fact] **********************************************************************************************************
+ok: [localhost] => {
+    "msg": "Parametr is all default fact"
+}
+
+PLAY RECAP *****************************************************************************************************************
+localhost                  : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+
 3. Воспользуйтесь подготовленным (используется `docker`) или создайте собственное окружение для проведения дальнейших испытаний.
+
+vagrant@netology1:~/8-git-net/mnt-homeworks/08-ansible-01-base/playbook$ docker run --name centos7 -d pycontribs/centos:7 sleep 60000000
+vagrant@netology1:~/8-git-net/mnt-homeworks/08-ansible-01-base/playbook$ docker run --name ubuntu -d pycontribs/ubuntu sleep 60000000
+
 4. Проведите запуск playbook на окружении из `prod.yml`. Зафиксируйте полученные значения `some_fact` для каждого из `managed host`.
+vagrant@netology1:~/8-git-net/mnt-homeworks/08-ansible-01-base/playbook$ ansible-playbook -i inventory/prod.yml site.yml
+[WARNING]: log file at /var/log/ansible.log is not writeable and we cannot create it, aborting
+
+
+PLAY [Print os facts] ********************************************************************************************************************************************
+
+TASK [Gathering Facts] *******************************************************************************************************************************************
+ok: [ubuntu]
+ok: [centos7]
+
+TASK [Print OS] **************************************************************************************************************************************************
+ok: [centos7] => {
+    "msg": "CentOS"
+}
+ok: [ubuntu] => {
+    "msg": "Ubuntu"
+}
+
+TASK [Print fact] ************************************************************************************************************************************************
+ok: [centos7] => {
+    "msg": "el"
+}
+ok: [ubuntu] => {
+    "msg": "deb"
+}
+
+PLAY RECAP *******************************************************************************************************************************************************
+centos7                    : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+ubuntu                     : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+
+ok: [centos7] => {
+    "msg": "Some_fact =  \"el\""
+}
+ok: [ubuntu] => {
+    "msg": "Some_fact =  \"deb\""
+}
+
 5. Добавьте факты в `group_vars` каждой из групп хостов так, чтобы для `some_fact` получились следующие значения: для `deb` - 'deb default fact', для `el` - 'el default fact'.
+vagrant@netology1:~/8-git-net/mnt-homeworks/08-ansible-01-base/playbook$ ansible-playbook -i inventory/prod.yml site.yml
+[WARNING]: log file at /var/log/ansible.log is not writeable and we cannot create it, aborting
+
+
+PLAY [Print os facts] ********************************************************************************************************************************************
+
+TASK [Gathering Facts] *******************************************************************************************************************************************
+ok: [ubuntu]
+ok: [centos7]
+
+TASK [Print OS] **************************************************************************************************************************************************
+ok: [ubuntu] => {
+    "msg": "Ubuntu"
+}
+ok: [centos7] => {
+    "msg": "CentOS"
+}
+
+TASK [Print fact] ************************************************************************************************************************************************
+ok: [centos7] => {
+    "msg": "Some_fact =  \"el default fact\""
+}
+ok: [ubuntu] => {
+    "msg": "Some_fact =  \"deb default fact\""
+}
+
+PLAY RECAP *******************************************************************************************************************************************************
+centos7                    : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+ubuntu                     : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
 6.  Повторите запуск playbook на окружении `prod.yml`. Убедитесь, что выдаются корректные значения для всех хостов.
 7. При помощи `ansible-vault` зашифруйте факты в `group_vars/deb` и `group_vars/el` с паролем `netology`.
+vagrant@netology1:~/8-git-net/mnt-homeworks/08-ansible-01-base/playbook$ vagrant@netology1:~/8-git-net/mnt-homeworks/08-ansible-01-base/playbook$ ansible-vault encrypt group_vars/deb/examp.yml
+[WARNING]: log file at /var/log/ansible.log is not writeable and we cannot create it, aborting
+
+New Vault password:
+Confirm New Vault password:
+Encryption successful
+vagrant@netology1:~/8-git-net/mnt-homeworks/08-ansible-01-base/playbook$ ansible-vault encrypt group_vars/el/examp.yml
+[WARNING]: log file at /var/log/ansible.log is not writeable and we cannot create it, aborting
+
+New Vault password:
+Confirm New Vault password:
+Encryption successful
+
+
 8. Запустите playbook на окружении `prod.yml`. При запуске `ansible` должен запросить у вас пароль. Убедитесь в работоспособности.
+vagrant@netology1:~/8-git-net/mnt-homeworks/08-ansible-01-base/playbook$ ansible-playbook -i inventory/prod.yml site.yml --ask-vault-pass
+[WARNING]: log file at /var/log/ansible.log is not writeable and we cannot create it, aborting
+
+Vault password:
+
+PLAY [Print os facts] *****************************************************************************************************************************************************
+
+TASK [Gathering Facts] ****************************************************************************************************************************************************
+ok: [ubuntu]
+ok: [centos7]
+
+TASK [Print OS] ***********************************************************************************************************************************************************
+ok: [centos7] => {
+    "msg": "CentOS"
+}
+ok: [ubuntu] => {
+    "msg": "Ubuntu"
+}
+
+TASK [Print fact] *********************************************************************************************************************************************************
+ok: [centos7] => {
+    "msg": "Some_fact =  \"el default fact\""
+}
+ok: [ubuntu] => {
+    "msg": "Some_fact =  \"deb default fact\""
+}
+
+PLAY RECAP ****************************************************************************************************************************************************************
+centos7                    : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+ubuntu                     : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
 9. Посмотрите при помощи `ansible-doc` список плагинов для подключения. Выберите подходящий для работы на `control node`.
+vagrant@netology1:~/8-git-net/mnt-homeworks/08-ansible-01-base/playbook$ ansible-doc -t connection -l
+local                          execute on controller 
+
 10. В `prod.yml` добавьте новую группу хостов с именем  `local`, в ней разместите localhost с необходимым типом подключения.
+
 11. Запустите playbook на окружении `prod.yml`. При запуске `ansible` должен запросить у вас пароль. Убедитесь что факты `some_fact` для каждого из хостов определены из верных `group_vars`.
+1agrant@netology1:~/8-git-net/mnt-homeworks/08-ansible-01-base/playbook$ ansible-playbook -i inventory/prod.yml site.yml --ask-vault-pass
+[WARNING]: log file at /var/log/ansible.log is not writeable and we cannot create it, aborting
+
+Vault password:
+[WARNING]: Found both group and host with same name: local
+
+PLAY [Print os facts] *****************************************************************************************************************************************************
+
+TASK [Gathering Facts] ****************************************************************************************************************************************************
+ok: [ubuntu]
+ok: [local]
+ok: [centos7]
+
+TASK [Print OS] ***********************************************************************************************************************************************************
+ok: [local] => {
+    "msg": "Ubuntu"
+}
+ok: [centos7] => {
+    "msg": "CentOS"
+}
+ok: [ubuntu] => {
+    "msg": "Ubuntu"
+}
+
+TASK [Print fact] *********************************************************************************************************************************************************
+ok: [local] => {
+    "msg": "Some_fact =  \"all default fact\""
+}
+ok: [centos7] => {
+    "msg": "Some_fact =  \"el default fact\""
+}
+ok: [ubuntu] => {
+    "msg": "Some_fact =  \"deb default fact\""
+}
+
+PLAY RECAP ****************************************************************************************************************************************************************
+centos7                    : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+local                      : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+ubuntu                     : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
 12. Заполните `README.md` ответами на вопросы. Сделайте `git push` в ветку `master`. В ответе отправьте ссылку на ваш открытый репозиторий с изменённым `playbook` и заполненным `README.md`.
 
 ## Необязательная часть
