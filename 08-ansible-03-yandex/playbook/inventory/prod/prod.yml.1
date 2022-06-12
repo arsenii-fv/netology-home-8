@@ -1,0 +1,22 @@
+---
+#all:
+  hosts:
+    cl-instance:
+      ansible_host: localhost 
+    vc-instance:
+      ansible_host: 10.0.2.15
+    lt-instance:
+      ansible_host: 10.0.2.15
+  vars:
+   # ansible_connection: ssh
+    ansible_user: vagrant# atman
+clickhouse-h:
+  hosts:
+    cl-instance:
+vector-h:
+  hosts:
+    vc-instance:
+lighthouse-h:
+  hosts:
+    lt-instance:
+

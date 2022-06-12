@@ -1,0 +1,6 @@
+---
+clickhouse:
+  hosts:
+    clickhouse-h:
+      ansible_host: localhost
+
