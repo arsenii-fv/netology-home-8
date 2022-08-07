@@ -1,3 +1,3 @@
 ---
-light_version: 18.3.0
-light_dir: /opt/lighthouse/{{ light_version }}
+light_version: 18.6.0
+lightdir: /opt/lighthouse
