@@ -1,6 +1,22 @@
 ---
+all:
+  hosts:
+    host-cl:
+      ansible_host: 51.250.103.190
+    host-vc:
+      ansible_host: 51.250.16.40
+    host-lt:
+      ansible_host: 51.250.102.183
+    vars:
+      ansible_connection: ssh
+      ansible_user: arsen
+    
 clickhouse:
   hosts:
-    clickhouse-h:
-      ansible_host: localhost
-
+    host-cl:
+vector:
+  hosts:
+    host-vc:
+lighthouse:
+  hosts:
+    host-lt:
