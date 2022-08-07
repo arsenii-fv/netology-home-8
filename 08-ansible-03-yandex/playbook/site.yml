@@ -1,112 +1,116 @@
-
 ---
-- name: Install Clickhouse
-  hosts: clickhouse-h
-  handlers:
-    - name: Start_clickhouse_service
-      become: true
-      ansible.builtin.service:
-        name: clickhouse-server
-        state: restarted
+ - name: Install Clickhouse
+   hosts: clickhouse
+   tasks:
+     - name: "Ensure installation dir Clickhouse"
+       become: true
+       become_user: root
+       file:
+         state: directory
+         path: "{{ click_dir }}"
+         mode: 0777
+     - name: Get clickhouse-client distrib
+       get_url:
+         url: "https://packages.clickhouse.com/deb/pool/stable/clickhouse-client_{{ clickhouse_version }}_all.deb"
+         dest: "{{ click_dir }}/clickhouse-client_{{ clickhouse_version }}.deb"
+         mode: 0644
+         force: false
 
-  tasks:
-    - name: Get clickhouse-client distrib
-      ansible.builtin.get_url:
-        url: "https://packages.clickhouse.com/deb/pool/stable/clickhouse-client_{{ clickhouse_version }}_all.deb"
-        dest: "{{ install_dir }}/clickhouse-client_{{ clickhouse_version }}.deb"
-        mode: 0644
-        force: false
+     - name: Get clickhouse-common distrib
+       get_url:
+         url: "https://packages.clickhouse.com/deb/pool/stable/clickhouse-common-static_{{ clickhouse_version }}_amd64.deb"
+         dest: "{{ click_dir }}/clickhouse-common-static_{{ clickhouse_version }}.deb"
+         mode: 0644
+         force: false
 
-    - name: Get clickhouse-common distrib
-      ansible.builtin.get_url:
-        url: "https://packages.clickhouse.com/deb/pool/stable/clickhouse-common-static_{{ clickhouse_version }}_amd64.deb"
-        dest: "{{ install_dir }}/clickhouse-common-static_{{ clickhouse_version }}.deb"
-        mode: 0644
-        force: false
+     - name: Get clickhouse-server distrib
+       get_url:
+         url: "https://packages.clickhouse.com/deb/pool/stable/clickhouse-server_{{ clickhouse_version }}_all.deb"
+         dest: "{{ click_dir }}/clickhouse-server_{{ clickhouse_version }}.deb"
+         mode: 0644
+         force: false
 
-    - name: Get clickhouse-server distrib
-      ansible.builtin.get_url:
-        url: "https://packages.clickhouse.com/deb/pool/stable/clickhouse-server_{{ clickhouse_version }}_all.deb"
-        dest: "{{ install_dir }}/clickhouse-server_{{ clickhouse_version }}.deb"
-        mode: 0644
-        force: false
+     - name: Install clickhouse packages
+       become: true
+       apt:
+         deb: "{{ item }}"
+       with_items:
+         - "{{ click_dir }}/clickhouse-common-static_{{ clickhouse_version }}.deb"
+         - "{{ click_dir }}/clickhouse-server_{{ clickhouse_version }}.deb"
+         - "{{ click_dir }}/clickhouse-client_{{ clickhouse_version }}.deb"
 
-    - name: Install clickhouse packages
-      become: true
-      apt:
-        deb: "{{ item }}"
-      with_items:
-        - "/home/vagrant/tmp/clickhouse-common-static_{{ clickhouse_version }}.deb"
-        - "{{ install_dir }}/clickhouse-server_{{ clickhouse_version }}.deb"
-        - "{{ install_dir }}/clickhouse-client_{{ clickhouse_version }}.deb"
-
-          #changed_when: true
-
-      notify: Start_clickhouse_service
-
-    - name: Create database
-      become: true
-      command: "clickhouse-client -q 'create database logs;'"
-      register: create_db
-      failed_when: create_db.rc != 0 and create_db.rc !=82
-      changed_when: create_db.rc == 0
+     - name: Start_clickhouse_service
+       become: true
+       ansible.builtin.service:
+         name: clickhouse-server
+         state: restarted
+         enabled: true
+       changed_when: true
+    
+     - name: Create database
+       become: true
+       command: "clickhouse-client -q 'create database logs;'"
+       register: create_db
+       failed_when: create_db.rc != 0 and create_db.rc !=82
+       changed_when: create_db.rc == 0
 
 - name: Install vector
-  hosts: clickhouse-h
+  hosts: vector
   tasks:
-    - name: Ensure installation dir vector
+    - name: "Ensure installation dir vector"
       become: true
       file:
+        path: "{{ item }}"
         state: directory
-        path: "{{ vector_dir }}"
+        mode: 0777
+      with_items:
+        - "{{ vector_dir }}"
+        - "/opt/vector"
 
     - name: Download vector
+      become: true
       ansible.builtin.get_url:
-        url: "https://packages.timber.io/vector/0.21.2/vector-0.21.2-aarch64-unknown-linux-musl.tar.gz"
-        dest: "{{ vector_dir }}/vector.tar.gz"
+        url: "https://packages.timber.io/vector/0.21.2/vector_0.21.2-1_amd64.deb"
+        dest: "{{ vector_dir }}/vector.deb"
+        mode: 0644
+        force: false
+    
+    - name: Install vector
+      become: true
+      apt: 
+        deb: "{{ vector_dir }}/vector.deb"
+
+    - name: Start_vector_service
+      become: true
+      ansible.builtin.service:
+        name: vector
+        state: restarted
+        enabled: true
+   
+- name: Install lighthouse
+  hosts: lighthouse
+  tasks:
+    - name: "Ensure installation dir lighthouse"
+      become: true
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0777
+      with_items:
+        - "{{ lightdir }}"
+        - "/opt/lighthouse"
+
+    - name: Download lighthouse
+      ansible.builtin.get_url:
+        url: "https://github.com/VKCOM/lighthouse/archive/refs/heads/master.zip"
+        dest: "{{ lightdir }}/master.zip"
         mode: 0644
         force: false
 
-    - name: Extract vector
+    - name: Extract lighthouse
       become: true
       unarchive:
-        src: "{{ vector_dir }}/vector.tar.gz"
-        dest: "{{ vector_dir }}"
-        extra_opts: [--strip-components=2]
-        creates: "{{ vector_dir }}/bin"
-
-    - name: Set environment vector
-      lineinfile:
-        path: /home/atman/.bashrc
-        # regexp: "^vector"
-        line: "export PATH=$PATH:/home/vagrant/.vector/bin"
-
-    - name: Start vector
-      command: "{{ vector_dir }}/bin/vector --config {{ vector_dir }}/config/vector.toml"
-      changed_when: false
-
-- name: Install lighthouse
-  hosts: clickhouse-h
-  tasks:
-    - name: Ensure installation dir lighthouse
-      become: true
-      file:
-        state: directory
-        path: "{{ light_dir }}"
-
-    - name: Download vector
-      ansible.builtin.get_url:
-        url: "https://nodejs.org/download/release/latest-v18.x/node-v{{ light_version }}-linux-arm65.tar.gz"
-        dest: "{{ light_dir }}/lighthouse.tar.gz"
-        mode: 0644
-        force: false
-
-        # - name: Extract vector
-        # become: true
-        #unarchive:
-        #src: "{{ light_dir }}/ligthouse.tar.gz"
-        #dest: "{{ light_dir }}"
-        #extra_opts: [--strip-components=2]
-        #creates: "{{ light_dir }}/bin"
-
-
+        remote_src: yes 
+        src: "{{ lightdir }}/master.zip"
+        dest: "/opt/lighthouse"
+      
