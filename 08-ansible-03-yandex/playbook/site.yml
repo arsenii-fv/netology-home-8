@@ -113,4 +113,23 @@
         remote_src: yes 
         src: "{{ lightdir }}/master.zip"
         dest: "/opt/lighthouse"
+    
+    - name: Ensure nginx
+      become: true
+      apt: 
+        name: nginx
+        state: latest
+        
+    - name: Add domain
+      become: true
+      template:
+        src: default.t
+        dest: /etc/nginx/sites-enabled/default 
+
+    - name: Start nginx
+      become: true
+      ansible.builtin.service:  
+        name: nginx
+        state: restarted
+     
       
