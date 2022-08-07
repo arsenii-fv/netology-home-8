@@ -1,2 +1,2 @@
 vector_version: 0.22.0-1
-vector_dir: /opt/vector/{{ vector_version }}
+vector_dir: /tmp/vector
