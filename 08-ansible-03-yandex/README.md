@@ -5,8 +5,8 @@
   - clickhouse
   - vector
   - lighthouse
-2.  
-3. tamplates/default.t файл настроек сайта lighthouse для сервера nginx
-
+2. VM для  clickhouse,  vector  на deb пакетах.
+3.  inventory/prod.yaml  назначить  ip , user
+4. tamplates/default.t файл настроек сайта lighthouse для сервера nginx
 
 ---
