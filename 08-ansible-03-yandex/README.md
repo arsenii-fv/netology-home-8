@@ -1,6 +1,6 @@
-# #08.03 Использование Yandex Cloud 
+## 08.03 Использование Yandex Cloud 
 
-###Установка Lighthouse в Yandex Cloud
+### Установка Lighthouse в Yandex Cloud
 1.  Установка и настройка хостов в YC:
   - clickhouse
   - vector
