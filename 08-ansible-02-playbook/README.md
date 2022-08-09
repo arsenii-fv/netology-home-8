@@ -28,7 +28,7 @@
  - Запускает vector
  - Tags не устанавливал
 ----
----- bash
+````
 Вывод ansible-lint. В конфиге установлен skip_list. 
 arsen@lite:~/08-ansible/netology-home-8/08-ansible-02-playbook/playbook$ ansible-lint site.yml
 WARNING  Overriding detected file kind 'yaml' with 'playbook' for given positional argument: site.yml
@@ -57,5 +57,4 @@ warn_list:  # or 'skip_list' to silence them completely
   - fqcn-builtins  # Use FQCN for builtin actions.
 
 Finished with 6 failure(s), 0 warning(s) on 1 files.
-
----
+````
