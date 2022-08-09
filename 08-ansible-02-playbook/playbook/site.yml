@@ -1,7 +1,7 @@
 
 ---
 - name: Install Clickhouse
-  hosts: clickhouse-01
+  hosts: clickhouse
   handlers:
     - name: Start_clickhouse_service
       become: true
@@ -52,7 +52,7 @@
       changed_when: create_db.rc == 0
 
 - name: Install vector
-  hosts: clickhouse-01
+  hosts: vector
   tasks:
     - name: Ensure installation dir vector
       become: true
