@@ -28,4 +28,34 @@
  - Запускает vector
  - Tags не устанавливал
 
+Вывод ansible-lint. В конфиге установлен skip_list. 
+arsen@lite:~/08-ansible/netology-home-8/08-ansible-02-playbook/playbook$ ansible-lint site.yml
+WARNING  Overriding detected file kind 'yaml' with 'playbook' for given positional argument: site.yml
+WARNING  Listing 6 violation(s) that are fatal
+fqcn-builtins: Use FQCN for builtin actions.
+site.yml:12 Task/Handler: Ensure installation dir clickhouse
+
+fqcn-builtins: Use FQCN for builtin actions.
+site.yml:40 Task/Handler: Install clickhouse packages
+
+fqcn-builtins: Use FQCN for builtin actions.
+site.yml:52 Task/Handler: Create database
+
+fqcn-builtins: Use FQCN for builtin actions.
+site.yml:62 Task/Handler: Ensure installation dir vector
+
+fqcn-builtins: Use FQCN for builtin actions.
+site.yml:76 Task/Handler: Extract vector
+
+fqcn-builtins: Use FQCN for builtin actions.
+site.yml:90 Task/Handler: Start vector
+
+You can skip specific rules or tags by adding them to your configuration file:
+# .config/ansible-lint.yml
+warn_list:  # or 'skip_list' to silence them completely
+  - fqcn-builtins  # Use FQCN for builtin actions.
+
+Finished with 6 failure(s), 0 warning(s) on 1 files.
+
+
 ---
