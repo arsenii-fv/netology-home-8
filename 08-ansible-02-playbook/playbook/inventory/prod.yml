@@ -1,5 +1,17 @@
 ---
+all:
+  hosts:
+    clickhouse-h:
+      ansible_host: 192.168.1.3
+    vector-h:
+      ansible_host: 192.168.1.5
+    vars:
+      ansible_connection: ssh
+      ansible_user: green
+    
 clickhouse:
   hosts:
-    clickhouse-01:
-      ansible_host: 127.0.0.1
+    clickhouse-h:
+vector:
+  hosts:
+    veector-h:
