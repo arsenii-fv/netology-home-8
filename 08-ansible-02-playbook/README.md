@@ -52,7 +52,7 @@ fqcn-builtins: Use FQCN for builtin actions.
 site.yml:90 Task/Handler: Start vector
 
 You can skip specific rules or tags by adding them to your configuration file:
-  .config/ansible-lint.yml
+ # .config/ansible-lint.yml
 warn_list:  # or 'skip_list' to silence them completely
   - fqcn-builtins  # Use FQCN for builtin actions.
 
